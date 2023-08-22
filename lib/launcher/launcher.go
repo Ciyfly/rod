@@ -11,9 +11,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync/atomic"
+	"syscall"
 
 	"github.com/go-rod/rod/lib/defaults"
 	"github.com/go-rod/rod/lib/launcher/flags"
@@ -409,6 +411,11 @@ func (l *Launcher) Launch() (string, error) {
 		cmd = exec.Command(bin, l.FormatArgs()...)
 	}
 
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			HideWindow: true,
+		}
+	}
 	l.setupCmd(cmd)
 
 	err = cmd.Start()

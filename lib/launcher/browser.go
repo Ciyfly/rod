@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"github.com/go-rod/rod/lib/defaults"
 	"github.com/go-rod/rod/lib/utils"
@@ -181,6 +182,11 @@ func (lc *Browser) Validate() error {
 
 	cmd := exec.Command(lc.BinPath(), "--headless", "--no-sandbox",
 		"--disable-gpu", "--dump-dom", "about:blank")
+	if runtime.GOOS == "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			HideWindow: true,
+		}
+	}
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		if strings.Contains(string(b), "error while loading shared libraries") {
